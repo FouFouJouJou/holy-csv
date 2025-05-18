@@ -3,7 +3,7 @@
 class Csv {
   U64 size;
   U8 **keys;
-  StrMap **fields;
+  StrMap *fields[1<<12];
 };
 
 U64 StrSplit(U8 *content, U8 delim) {
@@ -40,6 +40,34 @@ U0 PopulateKeys(U8 *line, U64 len, U8 **keys) {
   }
 }
 
+U0 ParseLine(U8 *line, U64 len, Csv *csv, U64 line_idx) {
+  U16 field_idx = 0, idx=0;
+  StrMap *map = StrMapNew(1);
+  while (idx < len) {
+  	U64 field_len = StrSplit(line+idx, ',');
+	U8 *field = StrNCpy(line+idx, field_len);
+	if (field_len == 0) {
+	  field = "NULL";
+	}
+	StrMapResize(map, StrLen(csv->keys[field_idx]) + StrLen(field));
+	StrMapSet(map, csv->keys[field_idx], field);
+	field_idx += 1;
+	idx += field_len+1;
+  }
+  csv->fields[line_idx] = map;
+  csv->size++;
+}
+
+U0 ParseData(U8 *data, U64 len, Csv *csv) {
+   U64 line_idx = 0, char_idx = 0; 
+   while (char_idx < len) {
+     U64 line_len = StrSplit(data+char_idx, '\n');
+     U8 *line = StrNCpy(data+char_idx, line_len);
+     ParseLine(line, line_len, csv, line_idx++);
+     char_idx += line_len+1;
+   }
+}
+
 U0 Main() {
   U64 total_keys = 0;
 
@@ -55,9 +83,18 @@ U0 Main() {
   csv.keys = keys;
   csv.size = 0;
 
-  for (U64 i=0; i<total_keys; ++i) {
-    "%s, ", keys[i];
-    Free(keys[i]);
+  ParseData(content+column_line_len+1, StrLen(content)-column_line_len-1, &csv);
+  "%d\n", csv.size;
+  for (U64 i=0; i<csv.size; ++i) {
+    "Line %d: {\n", i+1;
+    for (U64 k=0; k<total_keys; ++k) {
+      "\t%s: %s", csv.keys[k], StrMapGet(csv.fields[i], csv.keys[k]);
+      if (k+1 != total_keys) {
+        ",";
+      }
+      "\n";
+    }
+    "}\n";
   }
   Free(keys);
 }
