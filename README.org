@@ -1,2 +1,6 @@
 #+TITLE: HolyCsv
 A csv parsing library written in HolyC, the language of the gospel.
+
+* Requirements
+[[https://holyc-lang.com/docs/intro][HolyC compiler]] is available in two variants, standalone or the one that ships with [[https://templeos.org/][TempleOS]],
+the operating system that was built by [[https://en.wikipedia.org/wiki/Terry_A._Davis][Terry A. Davis]].
