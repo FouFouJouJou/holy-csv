@@ -150,22 +150,51 @@ Csv *CsvNew(U8 *data) {
   return csv;
 }
 
+U8 *CsvToJson(Csv *csv) {
+  U8 *result = StrNew("[\n");
+  for (U64 line = 0; line<csv->size; ++line) {
+    result = StrMerge(result, "\t{\n");
+    for (U64 key = 0; key<csv->total_keys; ++key) {
+      U8 *key_value = StrPrint(NULL
+			       , "\t\t\"%s\": \"%s\""
+			       , csv->keys[key]
+			       , GetField(csv, line, csv->keys[key]));
+      result = StrMerge(result, key_value);
+      Free(key_value);
+      if (key+1 != csv->total_keys) {
+	result = StrMerge(result, ",");
+      }
+      result = StrMerge(result, "\n");
+    }
+    result = StrMerge(result, "\t}");
+    if (line+1 != csv->size) {
+      result = StrMerge(result, ",");
+    }
+    result = StrMerge(result, "\n");
+  }
+  result = StrMerge(result, "]");
+  return result;
+}
+
+U0 Help() {
+  "./main --json <output.json> <input.csv>";
+}
+
 U0 Main(U64 argc, U8 **argv) {
-  if (argc != 2) {
+  U8 *json_option =  "--json";
+  if (argc != 4 || StrNCmp(argv[1], json_option, StrLen(json_option))) {
+    "[ERROR]: csv file path is missing\n";
+    Help();
     Exit(1);
   }
-  U8 *content = FileRead(argv[1]);
+
+  U8 *content = FileRead(argv[3]);
   Csv *csv = CsvNew(content);
-
-  "%d\n", csv->total_keys;
-  PrintfCsv(csv);
-
   U8 *csv_string = CsvToString(csv);
-
-  "file stored: %d\n", FileWrite(CSV_BACKUP_FILE_PATH, csv_string, StrLen(csv_string), O_CREAT | O_RDWR);
-
+  U64 csv_len = StrLen(csv_string);
+  U8 *json = CsvToJson(csv);
+  FileWrite(argv[2], json, StrLen(json), O_CREAT | O_RDWR);
   Free(content);
-  /* FreeCsv(csv); */
   Free(csv);
 
   Exit(0);
