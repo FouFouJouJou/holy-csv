@@ -5,7 +5,8 @@ A csv parsing library written in HolyC, the language of the gospel.
 - [[https://holyc-lang.com/docs/intro][HolyC compiler]] is available in two variants, standalone or the one that ships with [[https://templeos.org/][TempleOS]], the operating system that was built by [[https://en.wikipedia.org/wiki/Terry_A._Davis][Terry A. Davis]]. The same person who wrote HolyC.
 
 * Instructions
-I am using the standalone compiler and it's behaviour is very strange. Passing pointer dereferences seg faults and the performace with large csv files is horrible (still to be fixed).
+The standalone compiler is the one being used and the behaviour is very strange. Passing pointer dereferences seg faults and the performace with large csv files is horrible.
+May revert to using TempleOS instead.
 #+begin_src shell
   hcc main.HS -o main
   ./main --help
