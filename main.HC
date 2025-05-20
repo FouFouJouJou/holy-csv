@@ -182,9 +182,16 @@ U0 Help() {
 
 U0 Main(U64 argc, U8 **argv) {
   U8 *json_option =  "--json";
+  U8 *help_option =  "--help";
+
+  if (argc == 2 && !StrNCmp(argv[1], "--help", StrLen(help_option))) {
+    Help;
+    Exit(0);
+  }
+
   if (argc != 4 || StrNCmp(argv[1], json_option, StrLen(json_option))) {
     "[ERROR]: csv file path is missing\n";
-    Help();
+    Help;
     Exit(1);
   }
 
